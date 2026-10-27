@@ -82,4 +82,3 @@ enum NoteAccent {
 
   Color cardColor(bool isDark) => isDark ? darkColor : lightColor;
 }
-

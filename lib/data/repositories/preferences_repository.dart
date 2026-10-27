@@ -66,4 +66,3 @@ class PreferencesRepository extends ChangeNotifier {
     await prefs.setBool(_kHapticsEnabled, enabled);
   }
 }
-

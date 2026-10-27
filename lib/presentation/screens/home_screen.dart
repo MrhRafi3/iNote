@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/animations/spring_widgets.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/theme/app_radii.dart';
 import '../../core/widgets/empty_state_view.dart';
 import '../../core/widgets/search_bar_widget.dart';
 import '../../data/models/note_filter.dart';
@@ -57,38 +56,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ? _selectedCategory
               : null,
         ),
-      ),
-    );
-  }
-
-  void _showAddFolderDialog() {
-    final controller = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('New Folder'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: const InputDecoration(hintText: 'Folder name...'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final name = controller.text.trim();
-              if (name.isNotEmpty) {
-                NotesRepository.instance.addFolder(name);
-                setState(() => _selectedCategory = name);
-              }
-              Navigator.pop(ctx);
-            },
-            child: const Text('Create'),
-          ),
-        ],
       ),
     );
   }
@@ -200,43 +167,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                 ),
                                 const SizedBox(height: 2),
-                                Row(
-                                  children: [
-                                    Text(
-                                      'iNote',
-                                      style: TextStyle(
-                                        fontSize: 28,
-                                        fontWeight: FontWeight.w800,
-                                        letterSpacing: -0.8,
-                                        color: isDark
-                                            ? AppColors.darkTextPrimary
-                                            : AppColors.lightTextPrimary,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 7,
-                                        vertical: 2,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.primary.withValues(
-                                          alpha: 0.15,
-                                        ),
-                                        borderRadius: AppRadii.borderFull,
-                                      ),
-                                      child: Text(
-                                        'By Mrh Rafi',
-                                        style: TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w700,
-                                          color: isDark
-                                              ? AppColors.primaryLight
-                                              : AppColors.primary,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                                Text(
+                                  'iNote',
+                                  style: TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -0.8,
+                                    color: isDark
+                                        ? AppColors.darkTextPrimary
+                                        : AppColors.lightTextPrimary,
+                                  ),
                                 ),
                               ],
                             ),
@@ -253,8 +193,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                 });
                               },
                               child: Container(
-                                width: 38,
-                                height: 38,
+                                width: 44,
+                                height: 44,
                                 decoration: BoxDecoration(
                                   color: _isSearchOpen
                                       ? AppColors.primary
@@ -273,7 +213,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   _isSearchOpen
                                       ? Icons.close_rounded
                                       : Icons.search_rounded,
-                                  size: 18,
+                                  size: 22,
                                   color: _isSearchOpen
                                       ? Colors.white
                                       : (isDark
@@ -287,8 +227,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             PressableScale(
                               onTap: _showSortSheet,
                               child: Container(
-                                width: 38,
-                                height: 38,
+                                width: 44,
+                                height: 44,
                                 decoration: BoxDecoration(
                                   color: isDark
                                       ? AppColors.darkSurfaceElevated
@@ -303,7 +243,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                                 child: Icon(
                                   Icons.sort_rounded,
-                                  size: 18,
+                                  size: 22,
                                   color: isDark
                                       ? AppColors.darkTextPrimary
                                       : AppColors.lightTextPrimary,
@@ -319,8 +259,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                     : NotesViewMode.grid,
                               ),
                               child: Container(
-                                width: 38,
-                                height: 38,
+                                width: 44,
+                                height: 44,
                                 decoration: BoxDecoration(
                                   color: isDark
                                       ? AppColors.darkSurfaceElevated
@@ -337,7 +277,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   isGrid
                                       ? Icons.view_agenda_outlined
                                       : Icons.grid_view_rounded,
-                                  size: 18,
+                                  size: 22,
                                   color: isDark
                                       ? AppColors.darkTextPrimary
                                       : AppColors.lightTextPrimary,
@@ -365,7 +305,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
-                // Horizontal Folder Filter Chips
+                // Horizontal Category Filter Chips
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.only(bottom: 12),
@@ -375,7 +315,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       folderCounts: folderCounts,
                       onSelected: (cat) =>
                           setState(() => _selectedCategory = cat),
-                      onAddFolder: _showAddFolderDialog,
                     ),
                   ),
                 ),

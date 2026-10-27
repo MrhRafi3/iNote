@@ -80,7 +80,7 @@ class EditorFormattingToolbar extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      height: 44,
+      height: 48,
       decoration: BoxDecoration(
         color: isDark
             ? AppColors.darkSurfaceElevated
@@ -208,8 +208,8 @@ class _ToolbarButton extends StatelessWidget {
       child: PressableScale(
         onTap: isEnabled ? onTap : null,
         child: Container(
-          width: 38,
-          height: 38,
+          width: 42,
+          height: 42,
           margin: const EdgeInsets.symmetric(horizontal: 2, vertical: 3),
           decoration: BoxDecoration(
             color: isActive
@@ -219,7 +219,7 @@ class _ToolbarButton extends StatelessWidget {
                 : Colors.transparent,
             borderRadius: AppRadii.borderSm,
           ),
-          child: Icon(icon, size: 20, color: iconColor),
+          child: Icon(icon, size: 22, color: iconColor),
         ),
       ),
     );

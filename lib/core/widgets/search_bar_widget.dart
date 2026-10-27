@@ -59,7 +59,7 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
         children: [
           Icon(
             Icons.search_rounded,
-            size: 20,
+            size: 22,
             color: isDark
                 ? AppColors.darkTextSecondary
                 : AppColors.lightTextSecondary,
@@ -99,20 +99,23 @@ class _SearchBarWidgetState extends State<SearchBarWidget> {
             duration: const Duration(milliseconds: 180),
             child: _hasText
                 ? IconButton(
-                    icon: const Icon(Icons.cancel_rounded, size: 18),
+                    icon: const Icon(Icons.cancel_rounded, size: 20),
                     color: isDark
                         ? AppColors.darkTextTertiary
                         : AppColors.lightTextTertiary,
-                    splashRadius: 16,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
+                    splashRadius: 20,
+                    padding: const EdgeInsets.all(4),
+                    constraints: const BoxConstraints(
+                      minWidth: 40,
+                      minHeight: 40,
+                    ),
                     onPressed: () {
                       widget.controller.clear();
                       widget.onChanged?.call('');
                       widget.onClear?.call();
                     },
                   )
-                : const SizedBox(width: 18),
+                : const SizedBox(width: 20),
           ),
         ],
       ),

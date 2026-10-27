@@ -14,6 +14,7 @@ class GlassContainer extends StatelessWidget {
   final BorderRadius? borderRadius;
   final double blur;
   final Color? color;
+  final Gradient? gradient;
   final Border? border;
   final List<BoxShadow>? boxShadow;
   final VoidCallback? onTap;
@@ -28,6 +29,7 @@ class GlassContainer extends StatelessWidget {
     this.borderRadius,
     this.blur = 18.0,
     this.color,
+    this.gradient,
     this.border,
     this.boxShadow,
     this.onTap,
@@ -45,7 +47,7 @@ class GlassContainer extends StatelessWidget {
     final defaultBorder =
         border ??
         Border.all(
-          color: isDark ? AppColors.darkBorder : AppColors.lightBorder,
+          color: isDark ? const Color(0x28FFFFFF) : const Color(0x20000000),
           width: 1.0,
         );
 
@@ -55,6 +57,7 @@ class GlassContainer extends StatelessWidget {
       padding: padding,
       decoration: BoxDecoration(
         color: color ?? defaultColor,
+        gradient: gradient,
         borderRadius: radius,
         border: defaultBorder,
         boxShadow: boxShadow,

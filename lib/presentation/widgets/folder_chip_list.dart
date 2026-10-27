@@ -3,12 +3,11 @@ import '../../core/animations/spring_widgets.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radii.dart';
 
-/// Horizontal folder / category selector with note counts and add-folder trigger.
+/// Horizontal category selector with note counts and clean liquid-glass styling.
 class FolderChipList extends StatelessWidget {
   final List<String> folders;
   final String selectedCategory;
   final ValueChanged<String> onSelected;
-  final VoidCallback onAddFolder;
   final Map<String, int> folderCounts;
 
   const FolderChipList({
@@ -16,7 +15,6 @@ class FolderChipList extends StatelessWidget {
     required this.folders,
     required this.selectedCategory,
     required this.onSelected,
-    required this.onAddFolder,
     this.folderCounts = const {},
   });
 
@@ -26,61 +24,13 @@ class FolderChipList extends StatelessWidget {
     final allCategories = ['All', ...folders];
 
     return SizedBox(
-      height: 38,
+      height: 42,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: allCategories.length + 1,
+        itemCount: allCategories.length,
         separatorBuilder: (context, index) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
-          if (index == allCategories.length) {
-            // Add folder button
-            return PressableScale(
-              onTap: onAddFolder,
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 7,
-                ),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? AppColors.darkSurfaceElevated
-                      : AppColors.lightSurfaceElevated,
-                  borderRadius: AppRadii.borderFull,
-                  border: Border.all(
-                    color: isDark
-                        ? AppColors.darkBorder
-                        : AppColors.lightBorder,
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.add_rounded,
-                      size: 16,
-                      color: isDark
-                          ? AppColors.darkTextSecondary
-                          : AppColors.lightTextSecondary,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      'Folder',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: isDark
-                            ? AppColors.darkTextSecondary
-                            : AppColors.lightTextSecondary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-
           final category = allCategories[index];
           final isSelected = category == selectedCategory;
           final count = folderCounts[category];
@@ -90,7 +40,8 @@ class FolderChipList extends StatelessWidget {
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 180),
               curve: Curves.easeOutCubic,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+              alignment: Alignment.center,
               decoration: BoxDecoration(
                 color: isSelected
                     ? AppColors.primary
@@ -127,8 +78,8 @@ class FolderChipList extends StatelessWidget {
                     const SizedBox(width: 6),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 5,
-                        vertical: 1,
+                        horizontal: 6,
+                        vertical: 1.5,
                       ),
                       decoration: BoxDecoration(
                         color: isSelected

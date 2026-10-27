@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/widgets/glass_floating_bar.dart';
 import 'favorites_screen.dart';
-import 'folders_screen.dart';
 import 'home_screen.dart';
 import 'note_editor_screen.dart';
 import 'settings_screen.dart';
@@ -19,7 +18,6 @@ class _AppShellState extends State<AppShell> {
 
   final List<Widget> _pages = const [
     HomeScreen(),
-    FoldersScreen(),
     FavoritesScreen(),
     SettingsScreen(),
   ];
@@ -31,14 +29,9 @@ class _AppShellState extends State<AppShell> {
       label: 'Notes',
     ),
     GlassDockItem(
-      icon: Icons.folder_outlined,
-      selectedIcon: Icons.folder_rounded,
-      label: 'Folders',
-    ),
-    GlassDockItem(
-      icon: Icons.star_outline_rounded,
-      selectedIcon: Icons.star_rounded,
-      label: 'Important',
+      icon: Icons.push_pin_outlined,
+      selectedIcon: Icons.push_pin_rounded,
+      label: 'Pinned',
     ),
     GlassDockItem(
       icon: Icons.settings_outlined,

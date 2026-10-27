@@ -321,7 +321,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
   }
 
   void _showFolderPicker() {
-    final folders = NotesRepository.instance.folders;
+    final categories = NotesRepository.instance.folders;
     showModalBottomSheet(
       context: context,
       builder: (ctx) => SafeArea(
@@ -334,23 +334,28 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                 child: Text(
-                  'Move to Folder',
+                  'Note Category',
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                 ),
               ),
               const Divider(),
-              ...folders.map(
-                (f) => ListTile(
+              ...categories.map(
+                (c) => ListTile(
                   leading: Icon(
-                    Icons.folder_outlined,
-                    color: f == _category ? AppColors.primary : null,
+                    Icons.bookmark_outline_rounded,
+                    size: 22,
+                    color: c == _category ? AppColors.primary : null,
                   ),
-                  title: Text(f),
-                  trailing: f == _category
-                      ? const Icon(Icons.check, color: AppColors.primary)
+                  title: Text(c),
+                  trailing: c == _category
+                      ? const Icon(
+                          Icons.check_rounded,
+                          color: AppColors.primary,
+                          size: 20,
+                        )
                       : null,
                   onTap: () {
-                    setState(() => _category = f);
+                    setState(() => _category = c);
                     _triggerAutoSave();
                     Navigator.pop(ctx);
                   },
@@ -384,7 +389,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
           backgroundColor: Colors.transparent,
           elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 22),
             onPressed: () async {
               await _flushSave();
               if (context.mounted) {
@@ -521,9 +526,9 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                   value: 'folder',
                   child: Row(
                     children: [
-                      const Icon(Icons.folder_outlined, size: 18),
-                      const SizedBox(width: 8),
-                      Text('Folder: $_category'),
+                      const Icon(Icons.bookmark_outline_rounded, size: 20),
+                      const SizedBox(width: 10),
+                      Text('Category: $_category'),
                     ],
                   ),
                 ),
@@ -531,8 +536,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                   value: 'share',
                   child: Row(
                     children: [
-                      Icon(Icons.share_outlined, size: 18),
-                      SizedBox(width: 8),
+                      Icon(Icons.share_outlined, size: 20),
+                      SizedBox(width: 10),
                       Text('Share Note'),
                     ],
                   ),
@@ -544,10 +549,10 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                     children: [
                       Icon(
                         Icons.delete_outline_rounded,
-                        size: 18,
+                        size: 20,
                         color: AppColors.error,
                       ),
-                      SizedBox(width: 8),
+                      SizedBox(width: 10),
                       Text(
                         'Move to Trash',
                         style: TextStyle(color: AppColors.error),
@@ -598,8 +603,8 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
-                                  Icons.folder_rounded,
-                                  size: 13,
+                                  Icons.bookmark_rounded,
+                                  size: 14,
                                   color: isDark
                                       ? AppColors.darkTextSecondary
                                       : AppColors.lightTextSecondary,

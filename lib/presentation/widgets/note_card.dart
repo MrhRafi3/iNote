@@ -163,38 +163,44 @@ class NoteCard extends StatelessWidget {
                     onTap: () =>
                         NotesRepository.instance.toggleFavorite(note.id),
                     behavior: HitTestBehavior.opaque,
-                    child: Padding(
-                      padding: const EdgeInsets.all(3),
-                      child: Icon(
-                        note.favorite
-                            ? Icons.star_rounded
-                            : Icons.star_outline_rounded,
-                        size: 17,
-                        color: note.favorite
-                            ? Colors.amber
-                            : (isDark
-                                  ? AppColors.darkTextTertiary
-                                  : AppColors.lightTextTertiary),
+                    child: SizedBox(
+                      width: 32,
+                      height: 32,
+                      child: Center(
+                        child: Icon(
+                          note.favorite
+                              ? Icons.star_rounded
+                              : Icons.star_outline_rounded,
+                          size: 18,
+                          color: note.favorite
+                              ? Colors.amber
+                              : (isDark
+                                    ? AppColors.darkTextTertiary
+                                    : AppColors.lightTextTertiary),
+                        ),
                       ),
                     ),
                   ),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: 2),
                   // Pin button
                   GestureDetector(
                     onTap: () => NotesRepository.instance.togglePin(note.id),
                     behavior: HitTestBehavior.opaque,
-                    child: Padding(
-                      padding: const EdgeInsets.all(3),
-                      child: Icon(
-                        note.pinned
-                            ? Icons.push_pin_rounded
-                            : Icons.push_pin_outlined,
-                        size: 16,
-                        color: note.pinned
-                            ? AppColors.primary
-                            : (isDark
-                                  ? AppColors.darkTextTertiary
-                                  : AppColors.lightTextTertiary),
+                    child: SizedBox(
+                      width: 32,
+                      height: 32,
+                      child: Center(
+                        child: Icon(
+                          note.pinned
+                              ? Icons.push_pin_rounded
+                              : Icons.push_pin_outlined,
+                          size: 18,
+                          color: note.pinned
+                              ? AppColors.primary
+                              : (isDark
+                                    ? AppColors.darkTextTertiary
+                                    : AppColors.lightTextTertiary),
+                        ),
                       ),
                     ),
                   ),

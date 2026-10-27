@@ -63,14 +63,14 @@ class GlassFloatingBar extends StatelessWidget {
                         duration: const Duration(milliseconds: 220),
                         curve: Curves.easeOutCubic,
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 8,
+                          horizontal: 16,
+                          vertical: 10,
                         ),
                         decoration: BoxDecoration(
                           color: isSelected
                               ? (isDark
-                                    ? AppColors.darkSurfaceHighlight
-                                    : AppColors.lightSurfaceHighlight)
+                                    ? AppColors.primary.withValues(alpha: 0.18)
+                                    : AppColors.primary.withValues(alpha: 0.12))
                               : Colors.transparent,
                           borderRadius: AppRadii.borderFull,
                         ),
@@ -79,7 +79,7 @@ class GlassFloatingBar extends StatelessWidget {
                           children: [
                             Icon(
                               isSelected ? item.selectedIcon : item.icon,
-                              size: 20,
+                              size: 22,
                               color: isSelected
                                   ? AppColors.primary
                                   : (isDark
@@ -111,8 +111,8 @@ class GlassFloatingBar extends StatelessWidget {
             PressableScale(
               onTap: onAddNote,
               child: Container(
-                width: 52,
-                height: 52,
+                width: 54,
+                height: 54,
                 decoration: BoxDecoration(
                   gradient: const LinearGradient(
                     colors: [AppColors.primaryLight, AppColors.primary],
@@ -129,7 +129,7 @@ class GlassFloatingBar extends StatelessWidget {
                 child: const Icon(
                   Icons.add_rounded,
                   color: Colors.white,
-                  size: 28,
+                  size: 26,
                 ),
               ),
             ),

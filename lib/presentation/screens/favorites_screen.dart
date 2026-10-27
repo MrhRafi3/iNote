@@ -46,14 +46,14 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           appBar: AppBar(
             title: const Text('Important Notes'),
             bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(48),
+              preferredSize: const Size.fromHeight(52),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 6,
                 ),
                 child: Container(
-                  height: 36,
+                  height: 40,
                   decoration: BoxDecoration(
                     color: isDark
                         ? AppColors.darkSurfaceElevated

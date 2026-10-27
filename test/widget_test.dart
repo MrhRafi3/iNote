@@ -15,19 +15,18 @@ void main() {
   });
 
   testWidgets(
-    'iNote app launches with header, navigation dock, and empty state',
+    'iNote app launches with clean header, 3-tab liquid glass dock, and empty state',
     (WidgetTester tester) async {
       await tester.pumpWidget(const NotepadApp());
       await tester.pumpAndSettle();
 
-      // Verify Title and author attribution
+      // Verify Title (without developer badge on header)
       expect(find.text('iNote'), findsOneWidget);
-      expect(find.text('By Mrh Rafi'), findsOneWidget);
+      expect(find.text('By Mrh Rafi'), findsNothing);
 
       // Verify Navigation Dock items
       expect(find.text('Notes'), findsOneWidget);
-      expect(find.byIcon(Icons.folder_outlined), findsOneWidget);
-      expect(find.byIcon(Icons.star_outline_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.push_pin_outlined), findsOneWidget);
       expect(find.byIcon(Icons.settings_outlined), findsOneWidget);
 
       // Verify empty state view is visible initially
@@ -38,21 +37,42 @@ void main() {
     },
   );
 
-  testWidgets('Can tap on Folders tab and navigate', (
+  testWidgets('Can navigate to Pinned tab and view pinned notes', (
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(const NotepadApp());
     await tester.pumpAndSettle();
 
-    // Tap on Folders dock item
-    await tester.tap(find.byIcon(Icons.folder_outlined));
+    // Tap on Pinned dock item
+    await tester.tap(find.byIcon(Icons.push_pin_outlined));
     await tester.pumpAndSettle();
 
-    // Verify Folders screen header
-    expect(find.text('Folders'), findsWidgets);
-    expect(find.text('Normal'), findsOneWidget);
-    expect(find.text('Personal'), findsOneWidget);
-    expect(find.text('Ideas'), findsOneWidget);
-    expect(find.text('Work'), findsOneWidget);
+    // Verify Pinned / Important notes header
+    expect(find.text('Important Notes'), findsOneWidget);
+    expect(find.text('No pinned notes'), findsOneWidget);
   });
+
+  testWidgets(
+    'Can navigate to Settings tab and view Mrh Rafi developer credit',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(const NotepadApp());
+      await tester.pumpAndSettle();
+
+      // Tap on Settings dock item
+      await tester.tap(find.byIcon(Icons.settings_outlined));
+      await tester.pumpAndSettle();
+
+      // Verify Settings screen options
+      expect(find.text('Settings'), findsWidgets);
+      expect(find.text('Theme Mode'), findsOneWidget);
+
+      // Scroll to reveal About section
+      await tester.scrollUntilVisible(find.text('Mrh Rafi'), 200);
+      await tester.pumpAndSettle();
+
+      // Verify Mrh Rafi developer credit inside About section
+      expect(find.text('Mrh Rafi'), findsOneWidget);
+      expect(find.text('Designed & Created by '), findsOneWidget);
+    },
+  );
 }

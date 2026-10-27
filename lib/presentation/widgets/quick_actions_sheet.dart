@@ -86,7 +86,7 @@ class QuickActionsSheet extends StatelessWidget {
             const SizedBox(height: 12),
             const Divider(),
             ListTile(
-              leading: const Icon(Icons.edit_outlined),
+              leading: const Icon(Icons.edit_outlined, size: 22),
               title: const Text('Open & Edit'),
               onTap: () {
                 Navigator.pop(context);
@@ -96,6 +96,7 @@ class QuickActionsSheet extends StatelessWidget {
             ListTile(
               leading: Icon(
                 note.pinned ? Icons.push_pin_outlined : Icons.push_pin_rounded,
+                size: 22,
               ),
               title: Text(note.pinned ? 'Unpin from Top' : 'Pin to Top'),
               onTap: () {
@@ -106,6 +107,7 @@ class QuickActionsSheet extends StatelessWidget {
             ListTile(
               leading: Icon(
                 note.favorite ? Icons.star_outline_rounded : Icons.star_rounded,
+                size: 22,
               ),
               title: Text(
                 note.favorite ? 'Remove from Favorites' : 'Add to Favorites',
@@ -116,7 +118,7 @@ class QuickActionsSheet extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.copy_rounded),
+              leading: const Icon(Icons.copy_rounded, size: 22),
               title: const Text('Duplicate Note'),
               onTap: () async {
                 Navigator.pop(context);
@@ -129,7 +131,7 @@ class QuickActionsSheet extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.share_outlined),
+              leading: const Icon(Icons.share_outlined, size: 22),
               title: const Text('Share Note'),
               onTap: () {
                 Navigator.pop(context);
@@ -140,7 +142,7 @@ class QuickActionsSheet extends StatelessWidget {
               },
             ),
             ListTile(
-              leading: const Icon(Icons.archive_outlined),
+              leading: const Icon(Icons.archive_outlined, size: 22),
               title: Text(note.archived ? 'Unarchive' : 'Archive Note'),
               onTap: () {
                 Navigator.pop(context);
@@ -151,10 +153,11 @@ class QuickActionsSheet extends StatelessWidget {
             ListTile(
               leading: const Icon(
                 Icons.delete_outline_rounded,
+                size: 22,
                 color: AppColors.error,
               ),
               title: const Text(
-                'Move to Trash',
+                'Delete Note',
                 style: TextStyle(color: AppColors.error),
               ),
               onTap: () {
@@ -162,7 +165,7 @@ class QuickActionsSheet extends StatelessWidget {
                 repo.moveToTrash(note.id);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: const Text('Moved to trash'),
+                    content: const Text('Note deleted'),
                     action: SnackBarAction(
                       label: 'Undo',
                       textColor: AppColors.primaryLight,

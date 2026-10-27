@@ -6,14 +6,13 @@ import '../../core/theme/app_radii.dart';
 import '../../data/models/note_filter.dart';
 import '../../data/repositories/notes_repository.dart';
 import '../../data/repositories/preferences_repository.dart';
-import 'trash_archive_screen.dart';
 
-/// Refined Settings & Preferences screen.
+/// Minimal, elegant Settings & About screen.
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
-  Future<void> _launch(String urlString) async {
-    final uri = Uri.parse(urlString);
+  Future<void> _launchEmail(String email) async {
+    final uri = Uri.parse('mailto:$email?subject=iNote%20Feedback');
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     }
@@ -93,6 +92,40 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
+  void _confirmClearAll(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Clear All Notes?'),
+        content: const Text(
+          'This will permanently delete all notes. Make sure to export a backup first if you want to keep your data.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.error),
+            onPressed: () async {
+              final repo = NotesRepository.instance;
+              for (var n in List.of(repo.allNotes)) {
+                await repo.permanentlyDelete(n.id);
+              }
+              if (ctx.mounted) Navigator.pop(ctx);
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('All notes have been cleared')),
+                );
+              }
+            },
+            child: const Text('Clear All'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -104,8 +137,6 @@ class SettingsScreen extends StatelessWidget {
       builder: (context, _) {
         final activeCount = repo.activeNotes.length;
         final pinnedCount = repo.pinnedNotes.length;
-        final trashCount = repo.trashNotes.length;
-        final archivedCount = repo.archivedNotes.length;
 
         return Scaffold(
           appBar: AppBar(title: const Text('Settings')),
@@ -136,7 +167,7 @@ class SettingsScreen extends StatelessWidget {
                         children: [
                           Icon(
                             Icons.brightness_6_rounded,
-                            size: 20,
+                            size: 22,
                             color: isDark
                                 ? AppColors.darkTextPrimary
                                 : AppColors.lightTextPrimary,
@@ -157,16 +188,16 @@ class SettingsScreen extends StatelessWidget {
                                 value: ThemeMode.system,
                                 icon: Icon(
                                   Icons.settings_brightness_rounded,
-                                  size: 16,
+                                  size: 18,
                                 ),
                               ),
                               ButtonSegment(
                                 value: ThemeMode.light,
-                                icon: Icon(Icons.light_mode_rounded, size: 16),
+                                icon: Icon(Icons.light_mode_rounded, size: 18),
                               ),
                               ButtonSegment(
                                 value: ThemeMode.dark,
-                                icon: Icon(Icons.dark_mode_rounded, size: 16),
+                                icon: Icon(Icons.dark_mode_rounded, size: 18),
                               ),
                             ],
                             selected: {prefs.themeMode},
@@ -187,7 +218,10 @@ class SettingsScreen extends StatelessWidget {
                     const Divider(),
                     // Default Note Layout
                     ListTile(
-                      leading: const Icon(Icons.view_compact_alt_rounded),
+                      leading: const Icon(
+                        Icons.view_compact_alt_rounded,
+                        size: 22,
+                      ),
                       title: const Text('Default Notes Layout'),
                       trailing: DropdownButton<NotesViewMode>(
                         value: repo.viewMode,
@@ -210,7 +244,7 @@ class SettingsScreen extends StatelessWidget {
                     const Divider(),
                     // Haptic feedback toggle
                     SwitchListTile(
-                      secondary: const Icon(Icons.vibration_rounded),
+                      secondary: const Icon(Icons.vibration_rounded, size: 22),
                       title: const Text('Haptic Micro-feedback'),
                       subtitle: const Text(
                         'Tactile response on taps and interactions',
@@ -240,77 +274,62 @@ class SettingsScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     ListTile(
-                      leading: const Icon(Icons.analytics_outlined),
-                      title: const Text('Storage Overview'),
+                      leading: const Icon(Icons.inventory_2_outlined, size: 22),
+                      title: const Text('Notes in Storage'),
                       subtitle: Text(
-                        '$activeCount active • $pinnedCount pinned • $archivedCount archived • $trashCount in trash',
+                        '$activeCount active • $pinnedCount pinned',
                       ),
                     ),
                     const Divider(),
                     ListTile(
-                      leading: const Icon(Icons.archive_outlined),
-                      title: const Text('Archived Notes'),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text('$archivedCount'),
-                          const Icon(Icons.chevron_right_rounded),
-                        ],
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                const TrashArchiveScreen(initialTab: 1),
-                          ),
-                        );
-                      },
-                    ),
-                    const Divider(),
-                    ListTile(
-                      leading: const Icon(Icons.delete_outline_rounded),
-                      title: const Text('Trash Bin'),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text('$trashCount'),
-                          const Icon(Icons.chevron_right_rounded),
-                        ],
-                      ),
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) =>
-                                const TrashArchiveScreen(initialTab: 0),
-                          ),
-                        );
-                      },
-                    ),
-                    const Divider(),
-                    ListTile(
-                      leading: const Icon(Icons.file_upload_outlined),
+                      leading: const Icon(Icons.file_upload_outlined, size: 22),
                       title: const Text('Export Backup (JSON)'),
-                      subtitle: const Text('Safely export notes and notebooks'),
-                      trailing: const Icon(Icons.chevron_right_rounded),
+                      subtitle: const Text(
+                        'Save your notes safely to a backup file',
+                      ),
+                      trailing: const Icon(
+                        Icons.chevron_right_rounded,
+                        size: 20,
+                      ),
                       onTap: () => _exportNotes(context),
                     ),
                     const Divider(),
                     ListTile(
-                      leading: const Icon(Icons.file_download_outlined),
-                      title: const Text('Import Backup'),
-                      subtitle: const Text('Restore notes from JSON format'),
-                      trailing: const Icon(Icons.chevron_right_rounded),
+                      leading: const Icon(
+                        Icons.file_download_outlined,
+                        size: 22,
+                      ),
+                      title: const Text('Import Backup (JSON)'),
+                      subtitle: const Text('Restore notes from a backup file'),
+                      trailing: const Icon(
+                        Icons.chevron_right_rounded,
+                        size: 20,
+                      ),
                       onTap: () => _showImportDialog(context),
+                    ),
+                    const Divider(),
+                    ListTile(
+                      leading: const Icon(
+                        Icons.delete_sweep_outlined,
+                        size: 22,
+                        color: AppColors.error,
+                      ),
+                      title: const Text(
+                        'Clear All Notes',
+                        style: TextStyle(color: AppColors.error),
+                      ),
+                      subtitle: const Text(
+                        'Delete all stored notes permanently',
+                      ),
+                      onTap: () => _confirmClearAll(context),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 24),
 
-              // About & Attribution Section (Preserves Mrh Rafi)
-              _SectionHeader(title: 'ABOUT & AUTHOR'),
+              // About & Creator Section (Sole place for developer credit)
+              _SectionHeader(title: 'ABOUT'),
               Material(
                 color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
                 shape: RoundedRectangleBorder(
@@ -322,68 +341,143 @@ class SettingsScreen extends StatelessWidget {
                     width: 1,
                   ),
                 ),
-                child: Column(
-                  children: [
-                    ListTile(
-                      leading: Container(
-                        width: 36,
-                        height: 36,
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.15),
-                          shape: BoxShape.circle,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 18,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 38,
+                            height: 38,
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withValues(alpha: 0.14),
+                              borderRadius: AppRadii.borderMd,
+                            ),
+                            child: const Icon(
+                              Icons.edit_note_rounded,
+                              color: AppColors.primary,
+                              size: 22,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'iNote',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: -0.3,
+                                  color: isDark
+                                      ? AppColors.darkTextPrimary
+                                      : AppColors.lightTextPrimary,
+                                ),
+                              ),
+                              Text(
+                                'Version 2.0.0',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: isDark
+                                      ? AppColors.darkTextTertiary
+                                      : AppColors.lightTextTertiary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 14),
+                      const Divider(),
+                      const SizedBox(height: 12),
+                      // Subtle developer credit
+                      Row(
+                        children: [
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: const BoxDecoration(
+                              color: AppColors.primary,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Designed & Created by ',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: isDark
+                                  ? AppColors.darkTextSecondary
+                                  : AppColors.lightTextSecondary,
+                            ),
+                          ),
+                          Text(
+                            'Mrh Rafi',
+                            style: TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w700,
+                              color: isDark
+                                  ? AppColors.darkTextPrimary
+                                  : AppColors.lightTextPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      // Contact button
+                      InkWell(
+                        onTap: () => _launchEmail('mrhrafi@hotmail.com'),
+                        borderRadius: AppRadii.borderSm,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.mail_outline_rounded,
+                                size: 16,
+                                color: isDark
+                                    ? AppColors.darkTextTertiary
+                                    : AppColors.lightTextTertiary,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                'mrhrafi@hotmail.com',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: isDark
+                                      ? AppColors.darkTextTertiary
+                                      : AppColors.lightTextTertiary,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        child: const Icon(
-                          Icons.note_alt_rounded,
-                          color: AppColors.primary,
-                          size: 20,
+                      ),
+                      const SizedBox(height: 10),
+                      Text(
+                        '100% On-Device • Your notes stay private and never leave your phone.',
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: isDark
+                              ? AppColors.darkTextTertiary
+                              : AppColors.lightTextTertiary,
+                          height: 1.4,
                         ),
                       ),
-                      title: const Text('iNote — Premium Edition'),
-                      subtitle: const Text('Version 2.0.0 (Production Build)'),
-                    ),
-                    const Divider(),
-                    ListTile(
-                      leading: const Icon(Icons.person_outline_rounded),
-                      title: const Text('Author & Creator'),
-                      subtitle: const Text('Mrh Rafi • github.com/mrhrafi3'),
-                      trailing: const Icon(Icons.open_in_new_rounded, size: 18),
-                      onTap: () => _launch('https://github.com/mrhrafi3'),
-                    ),
-                    const Divider(),
-                    ListTile(
-                      leading: const Icon(Icons.mail_outline_rounded),
-                      title: const Text('Contact Developer'),
-                      subtitle: const Text('mrhrafi@hotmail.com'),
-                      trailing: const Icon(Icons.open_in_new_rounded, size: 18),
-                      onTap: () => _launch(
-                        'mailto:mrhrafi@hotmail.com?subject=iNote%20App%20Inquiry',
-                      ),
-                    ),
-                    const Divider(),
-                    ListTile(
-                      leading: const Icon(Icons.feedback_outlined),
-                      title: const Text('Feedback & Bug Reports'),
-                      subtitle: const Text('mrhrafi99@gmail.com'),
-                      trailing: const Icon(Icons.open_in_new_rounded, size: 18),
-                      onTap: () => _launch(
-                        'mailto:mrhrafi99@gmail.com?subject=iNote%20Feedback',
-                      ),
-                    ),
-                    const Divider(),
-                    ListTile(
-                      leading: const Icon(Icons.security_rounded),
-                      title: const Text('Privacy & Security'),
-                      subtitle: const Text(
-                        '100% On-device storage. No analytics or tracking.',
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 32),
               Center(
                 child: Text(
-                  'Crafted with ❤️ for fast, calm productivity',
+                  'Crafted for calm, distraction-free note taking',
                   style: TextStyle(
                     fontSize: 12,
                     color: isDark

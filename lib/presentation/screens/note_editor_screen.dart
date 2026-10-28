@@ -12,6 +12,7 @@ import '../../data/models/note_model.dart';
 import '../../data/repositories/notes_repository.dart';
 import '../widgets/editor_formatting_toolbar.dart';
 import '../widgets/note_color_picker.dart';
+import '../widgets/rich_text_note_controller.dart';
 
 enum SaveStatus { saved, saving, unsaved }
 
@@ -29,7 +30,7 @@ class NoteEditorScreen extends StatefulWidget {
 
 class _NoteEditorScreenState extends State<NoteEditorScreen> {
   late final TextEditingController _titleController;
-  late final TextEditingController _contentController;
+  late final RichTextNoteController _contentController;
   late final FocusNode _titleFocusNode;
   late final FocusNode _contentFocusNode;
 
@@ -71,11 +72,13 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     _updatedAt = note?.updatedAt ?? DateTime.now();
 
     _titleController = TextEditingController(text: note?.title ?? '');
-    _contentController = TextEditingController(text: note?.content ?? '');
+    _contentController = RichTextNoteController.fromMarkdown(
+      note?.content ?? '',
+    );
     _titleFocusNode = FocusNode();
     _contentFocusNode = FocusNode();
 
-    _undoStack.add(_contentController.text);
+    _undoStack.add(_contentController.toMarkdown());
 
     _titleController.addListener(_onTextChanged);
     _contentController.addListener(_onContentChanged);
@@ -100,7 +103,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
 
   void _onContentChanged() {
     if (!_isUndoRedoAction) {
-      final current = _contentController.text;
+      final current = _contentController.toMarkdown();
       if (_undoStack.isEmpty || _undoStack.last != current) {
         _undoStack.add(current);
         if (_undoStack.length > 40) _undoStack.removeAt(0);
@@ -116,10 +119,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       final current = _undoStack.removeLast();
       _redoStack.add(current);
       final previous = _undoStack.last;
-      _contentController.value = TextEditingValue(
-        text: previous,
-        selection: TextSelection.collapsed(offset: previous.length),
-      );
+      _contentController.loadMarkdown(previous, preserveSelection: true);
       _isUndoRedoAction = false;
       setState(() {});
       _triggerAutoSave();
@@ -131,10 +131,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
       _isUndoRedoAction = true;
       final next = _redoStack.removeLast();
       _undoStack.add(next);
-      _contentController.value = TextEditingValue(
-        text: next,
-        selection: TextSelection.collapsed(offset: next.length),
-      );
+      _contentController.loadMarkdown(next, preserveSelection: true);
       _isUndoRedoAction = false;
       setState(() {});
       _triggerAutoSave();
@@ -145,7 +142,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     return NoteModel(
       id: _noteId ?? 0,
       title: _titleController.text.trim(),
-      content: _contentController.text,
+      content: _contentController.toMarkdown(),
       category: _category,
       pinned: _pinned,
       favorite: _favorite,
@@ -792,6 +789,7 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
               onRedo: _redo,
               canUndo: _undoStack.length > 1,
               canRedo: _redoStack.isNotEmpty,
+              focusNode: _contentFocusNode,
             ),
           ],
         ),

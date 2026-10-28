@@ -64,7 +64,15 @@ class NoteModel {
     }
 
     if (content.trim().isNotEmpty) {
-      return content.trim();
+      // Strip markdown tags so note cards display clean, natural text excerpts
+      final clean = content
+          .replaceAll(RegExp(r'^#+\s*', multiLine: true), '')
+          .replaceAll(RegExp(r'^>\s*', multiLine: true), '')
+          .replaceAllMapped(RegExp(r'\*\*([^*]+)\*\*'), (m) => m.group(1) ?? '')
+          .replaceAllMapped(RegExp(r'\*([^*]+)\*'), (m) => m.group(1) ?? '')
+          .replaceAllMapped(RegExp(r'`([^`]+)`'), (m) => m.group(1) ?? '')
+          .trim();
+      return clean.isNotEmpty ? clean : content.trim();
     }
     return 'No additional text';
   }

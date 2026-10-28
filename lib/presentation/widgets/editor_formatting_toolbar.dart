@@ -2,16 +2,20 @@ import 'package:flutter/material.dart';
 import '../../core/animations/spring_widgets.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_radii.dart';
+import 'rich_text_note_controller.dart';
 
 /// Floating or keyboard-attached formatting toolbar for the note editor.
+/// Supports real rich-text toggling, active style highlighting, and keeps
+/// keyboard focus steady.
 class EditorFormattingToolbar extends StatelessWidget {
-  final TextEditingController textController;
+  final RichTextNoteController textController;
   final VoidCallback onToggleChecklist;
   final bool isChecklistMode;
   final VoidCallback? onUndo;
   final VoidCallback? onRedo;
   final bool canUndo;
   final bool canRedo;
+  final FocusNode? focusNode;
 
   const EditorFormattingToolbar({
     super.key,
@@ -22,57 +26,13 @@ class EditorFormattingToolbar extends StatelessWidget {
     this.onRedo,
     this.canUndo = false,
     this.canRedo = false,
+    this.focusNode,
   });
 
-  void _wrapSelection(String prefix, [String? suffix]) {
-    final text = textController.text;
-    final selection = textController.selection;
-    final after = suffix ?? prefix;
-
-    if (!selection.isValid) {
-      final newText = '$text$prefix$after';
-      textController.value = TextEditingValue(
-        text: newText,
-        selection: TextSelection.collapsed(
-          offset: newText.length - after.length,
-        ),
-      );
-      return;
-    }
-
-    final selectedText = selection.textInside(text);
-    final newText =
-        selection.textBefore(text) +
-        prefix +
-        selectedText +
-        after +
-        selection.textAfter(text);
-
-    textController.value = TextEditingValue(
-      text: newText,
-      selection: TextSelection(
-        baseOffset: selection.start + prefix.length,
-        extentOffset: selection.end + prefix.length,
-      ),
-    );
-  }
-
-  void _insertAtLineStart(String prefix) {
-    final text = textController.text;
-    final selection = textController.selection;
-    final offset = selection.isValid ? selection.start : text.length;
-
-    final before = text.substring(0, offset);
-    final lastNewline = before.lastIndexOf('\n');
-    final lineStart = lastNewline == -1 ? 0 : lastNewline + 1;
-
-    final newText =
-        text.substring(0, lineStart) + prefix + text.substring(lineStart);
-
-    textController.value = TextEditingValue(
-      text: newText,
-      selection: TextSelection.collapsed(offset: offset + prefix.length),
-    );
+  void _runAction(VoidCallback action) {
+    action();
+    // Maintain editor focus so the keyboard is not accidentally dismissed
+    focusNode?.requestFocus();
   }
 
   @override
@@ -92,82 +52,88 @@ class EditorFormattingToolbar extends StatelessWidget {
           ),
         ),
       ),
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 8),
-        children: [
-          // Checklist Mode Toggle
-          _ToolbarButton(
-            icon: Icons.checklist_rounded,
-            tooltip: 'Checklist Mode',
-            isActive: isChecklistMode,
-            onTap: onToggleChecklist,
-          ),
-          const _ToolbarDivider(),
-          // Heading
-          _ToolbarButton(
-            icon: Icons.title_rounded,
-            tooltip: 'Heading',
-            onTap: () => _insertAtLineStart('## '),
-          ),
-          // Bold
-          _ToolbarButton(
-            icon: Icons.format_bold_rounded,
-            tooltip: 'Bold',
-            onTap: () => _wrapSelection('**'),
-          ),
-          // Italic
-          _ToolbarButton(
-            icon: Icons.format_italic_rounded,
-            tooltip: 'Italic',
-            onTap: () => _wrapSelection('*'),
-          ),
-          // Bullet List
-          _ToolbarButton(
-            icon: Icons.format_list_bulleted_rounded,
-            tooltip: 'Bullet List',
-            onTap: () => _insertAtLineStart('- '),
-          ),
-          // Quote
-          _ToolbarButton(
-            icon: Icons.format_quote_rounded,
-            tooltip: 'Quote',
-            onTap: () => _insertAtLineStart('> '),
-          ),
-          // Code block
-          _ToolbarButton(
-            icon: Icons.code_rounded,
-            tooltip: 'Code',
-            onTap: () => _wrapSelection('`'),
-          ),
-          const _ToolbarDivider(),
-          // Timestamp
-          _ToolbarButton(
-            icon: Icons.schedule_rounded,
-            tooltip: 'Insert Timestamp',
-            onTap: () {
-              final now = DateTime.now();
-              final timeStr =
-                  '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')} ';
-              _wrapSelection(timeStr, '');
-            },
-          ),
-          const _ToolbarDivider(),
-          // Undo
-          _ToolbarButton(
-            icon: Icons.undo_rounded,
-            tooltip: 'Undo',
-            isEnabled: canUndo,
-            onTap: onUndo,
-          ),
-          // Redo
-          _ToolbarButton(
-            icon: Icons.redo_rounded,
-            tooltip: 'Redo',
-            isEnabled: canRedo,
-            onTap: onRedo,
-          ),
-        ],
+      child: ListenableBuilder(
+        listenable: textController,
+        builder: (context, _) {
+          return ListView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            children: [
+              // Checklist Mode Toggle
+              _ToolbarButton(
+                icon: Icons.checklist_rounded,
+                tooltip: 'Checklist Mode',
+                isActive: isChecklistMode,
+                onTap: onToggleChecklist,
+              ),
+              const _ToolbarDivider(),
+              // Heading
+              _ToolbarButton(
+                icon: Icons.title_rounded,
+                tooltip: 'Heading',
+                isActive: textController.isHeadingActive,
+                onTap: () => _runAction(textController.toggleHeading),
+              ),
+              // Bold
+              _ToolbarButton(
+                icon: Icons.format_bold_rounded,
+                tooltip: 'Bold',
+                isActive: textController.isBoldActive,
+                onTap: () => _runAction(textController.toggleBold),
+              ),
+              // Italic
+              _ToolbarButton(
+                icon: Icons.format_italic_rounded,
+                tooltip: 'Italic',
+                isActive: textController.isItalicActive,
+                onTap: () => _runAction(textController.toggleItalic),
+              ),
+              // Bullet List
+              _ToolbarButton(
+                icon: Icons.format_list_bulleted_rounded,
+                tooltip: 'Bullet List',
+                isActive: textController.isBulletActive,
+                onTap: () => _runAction(textController.toggleBulletList),
+              ),
+              // Quote
+              _ToolbarButton(
+                icon: Icons.format_quote_rounded,
+                tooltip: 'Quote',
+                isActive: textController.isQuoteActive,
+                onTap: () => _runAction(textController.toggleQuote),
+              ),
+              // Code
+              _ToolbarButton(
+                icon: Icons.code_rounded,
+                tooltip: 'Code',
+                isActive: textController.isCodeActive,
+                onTap: () => _runAction(textController.toggleCode),
+              ),
+              const _ToolbarDivider(),
+              // Timestamp
+              _ToolbarButton(
+                icon: Icons.schedule_rounded,
+                tooltip: 'Insert Timestamp',
+                onTap: () => _runAction(textController.insertTimestamp),
+              ),
+              const _ToolbarDivider(),
+              // Undo
+              _ToolbarButton(
+                icon: Icons.undo_rounded,
+                tooltip: 'Undo',
+                isEnabled: canUndo,
+                onTap: () => _runAction(() => onUndo?.call()),
+              ),
+              // Redo
+              _ToolbarButton(
+                icon: Icons.redo_rounded,
+                tooltip: 'Redo',
+                isEnabled: canRedo,
+                onTap: () => _runAction(() => onRedo?.call()),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -214,10 +180,16 @@ class _ToolbarButton extends StatelessWidget {
           decoration: BoxDecoration(
             color: isActive
                 ? (isDark
-                      ? AppColors.darkSurfaceHighlight
-                      : AppColors.lightSurfaceHighlight)
+                      ? AppColors.primary.withValues(alpha: 0.18)
+                      : AppColors.primary.withValues(alpha: 0.12))
                 : Colors.transparent,
             borderRadius: AppRadii.borderSm,
+            border: isActive
+                ? Border.all(
+                    color: AppColors.primary.withValues(alpha: 0.35),
+                    width: 1,
+                  )
+                : null,
           ),
           child: Icon(icon, size: 22, color: iconColor),
         ),

@@ -7,6 +7,7 @@ import 'presentation/screens/favorites_screen.dart';
 import 'presentation/screens/home_screen.dart';
 import 'presentation/screens/note_editor_screen.dart';
 import 'presentation/screens/settings_screen.dart';
+import 'presentation/screens/splash_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -18,7 +19,8 @@ Future<void> main() async {
 /// The root application widget supporting dynamic system/light/dark themes,
 /// smooth animated theme transitions, and modern liquid-glass aesthetics.
 class NotepadApp extends StatelessWidget {
-  const NotepadApp({super.key});
+  final bool showSplash;
+  const NotepadApp({super.key, this.showSplash = true});
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +35,7 @@ class NotepadApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: prefs.themeMode,
-          home: const AppShell(),
+          home: showSplash ? const SplashScreen() : const AppShell(),
         );
       },
     );
